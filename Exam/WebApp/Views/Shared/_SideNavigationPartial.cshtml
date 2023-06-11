@@ -1,0 +1,58 @@
+@functions
+{
+    readonly string[] _controllersList = {
+        // controllers go here
+        "Product",
+        "Recipe",
+        "RecipeProduct",
+        "UserProduct"
+    
+    };
+}
+<nav class="sidebar custom-scrollbar-container">
+    <div id="dismiss">
+        <i class="bi bi-caret-left-fill"></i>
+    </div>
+
+    <div class="sidebar-header py-0 px-2 px-md-3">
+        <h3>Meal Planner</h3>
+    </div>
+
+    <ul class="list-unstyled components pt-1" style="font-size: 110%">
+        <li class="nav-item">
+            <a class="nav-link lead pb-0" asp-area="" asp-controller="Home" asp-action="Index">
+                Home
+            </a>
+        </li>
+        @if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            <li><p>Log in or register account</p></li>
+        }
+        else 
+        {
+            if (User.IsInRole("Admin")) // Show only if user has person ctx || admin
+            {
+                <hr class="my-2" />
+                foreach (var controllerName in _controllersList)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="@controllerName" asp-action="Index">
+                            @(controllerName)
+                        </a>
+                    </li>
+                }
+            }
+        if (User.IsInRole("Admin"))
+        {
+            <li>
+                <a class="lead pb-0" href="#adminSubmenu" data-toggle="collapse" aria-expanded="false">Admin Pages</a>
+                <ul class="collapse list-unstyled" id="adminSubmenu">
+                    <li>
+                        <a class="nav-link" asp-area="Admin" asp-controller="Roles" asp-action="Index">Users</a>
+                    </li>
+                </ul>
+            </li>
+        }
+        }
+    </ul>
+</nav>

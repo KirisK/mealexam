@@ -1,0 +1,124 @@
+﻿@using System.IO
+@using System.Threading
+@using System.Globalization
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - WebApp</title>
+	<link rel="stylesheet" href="~/js/site.css" asp-append-version="true"/>
+    @await RenderSectionAsync("Css", required: false)
+    @await RenderSectionAsync("HeadScripts", required: false)
+</head>
+<body>
+    <header>
+        <partial name="_NavigationPartial"/>
+    </header>
+<div class="wrapper">
+	<partial name="_SideNavigationPartial"/>
+
+	<div class="container">
+		<main role="main" class="pb-3">
+			@RenderBody()
+		</main>
+	</div>
+
+	<footer class="border-top footer text-muted">
+		<div class="container">
+			@Html.Raw(string.Join("| ", User.Claims.Where(e => e.Type.Contains("role") || e.Type is "PersonId" or "CleaningId").Select(e => e.Type + " - " + e.Value).ToList()))
+		</div>
+	</footer>
+	<!-- Dark Overlay element -->
+	<div class="overlay"></div>
+</div>
+
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/jquery.validate.globalize.js" asp-append-version="true"></script>
+<script src="~/js/side-nav.js" asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+@{    
+	var cultureCode = "en";
+    var datePattern = "d.m.Y";
+    var timePattern = "H:i";
+    var clock24H = true;
+	var dateTimePattern = timePattern + " " + datePattern;
+}
+
+
+<script>
+    // https://github.com/globalizejs/globalize#installation
+    $.when(
+        $.get("/js/cldr-core/supplemental/likelySubtags.json", null, null, "json"),
+        $.get("/js/cldr-core/supplemental/numberingSystems.json", null, null, "json"),
+        $.get("/js/cldr-core/supplemental/timeData.json", null, null, "json"),
+        $.get("/js/cldr-core/supplemental/weekData.json", null, null, "json"),
+        
+        $.get("/js/cldr-numbers-modern/main/@cultureCode/numbers.json", null, null, "json"),
+        $.get("/js/cldr-numbers-modern/main/@cultureCode/currencies.json", null, null, "json"),
+        
+        $.get("/js/cldr-dates-modern/main/@cultureCode/ca-generic.json", null, null, "json"),
+        $.get("/js/cldr-dates-modern/main/@cultureCode/ca-gregorian.json", null, null, "json"),
+        $.get("/js/cldr-dates-modern/main/@cultureCode/dateFields.json", null, null, "json"),
+        $.get("/js/cldr-dates-modern/main/@cultureCode/timeZoneNames.json", null, null, "json")
+    ).then(function () {
+        return [].slice.apply(arguments, [0]).map(function (result) {
+            Globalize.load(result[0]);
+        });
+    }).then(function () {
+        // Initialise Globalize to the current culture
+        Globalize.locale('@cultureCode');
+    });
+    
+    $(function () {
+        $('[type="datetime-local"]').each(function (index, value) {
+            $(value).attr('type', 'text');
+            $(value).val(value.defaultValue);
+		    $(value).flatpickr({
+		        locale: "@cultureCode",
+		        enableTime: true,
+	    	    altFormat: "@dateTimePattern",
+	    	    altInput: true,
+	    	    // dateFormat: "Z", // iso format (causes -3h during summer)
+	    	    // use direct conversion, let backend deal with utc/whatever conversions
+	    	    dateFormat: "Y-m-d H:i:s",
+	    	    disableMobile: true,
+	    	    time_24hr: @(clock24H.ToString().ToLower()),
+		    });
+        });
+
+        $('[type="time"]').each(function (index, value) {
+            $(value).attr('type', 'text');
+            $(value).val(value.defaultValue);
+		    $(value).flatpickr({
+	    	    locale: "@cultureCode",
+	    	    enableTime: true,
+	    	    noCalendar: true,
+
+	    	    altFormat: "@timePattern",
+	    	    altInput: true,
+	    	    dateFormat: "H:i", // 24h HH:mm
+	    	    disableMobile: true,
+
+	    	    time_24hr: @(clock24H.ToString().ToLower()),
+		    });
+        });
+
+        $('[type="date"]').each(function (index, value) {
+		    $(value).attr('type', 'text');
+		    $(value).val(value.defaultValue);
+		    $(value).flatpickr({
+    		    locale: "@cultureCode",
+	    	    altFormat: "@datePattern",
+	    	    altInput: true,
+                disableMobile: true,
+	    	    dateFormat: "Y-m-d", // YYYY-MM-DD
+		    });
+        });
+    });
+</script>
+
+</body>
+</html>

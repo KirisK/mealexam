@@ -1,0 +1,18 @@
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Builder
+@inject IOptions<RequestLocalizationOptions> LocalizationOptions
+@{
+    var cultureItems = new List<string> {"ENG"};
+}
+<li class="nav-item">
+    <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Languages
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        @foreach (var langItem in cultureItems)
+        {
+            <a class="dropdown-item text-dark" asp-area="" asp-controller="Home">@langItem</a>
+        }
+    </div>
+</li>
+

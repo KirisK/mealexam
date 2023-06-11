@@ -1,0 +1,110 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>aspnet-WebApp-530929B1-222C-4B8E-B2B6-F63DB1361B80</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Asp.Versioning.Http" Version="7.0.0" />
+        <PackageReference Include="Asp.Versioning.Mvc" Version="7.0.0" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="7.0.0" />
+        <PackageReference Include="AutoMapper" Version="12.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.5" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.13" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DAL.EF.App\DAL.EF.App.csproj" />
+      <ProjectReference Include="..\Domain.App\Domain.App.csproj" />
+      <ProjectReference Include="..\Public.DTO.v1\Public.DTO.v1.csproj" />
+      <ProjectReference Include="..\Shared.Base\Shared.Base.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Cleaning\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Cleaning\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Cleaning\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Cleaning\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Cleaning\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Company\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Company\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Company\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Company\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Company\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\House\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\House\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\House\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\House\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\House\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Notification\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Notification\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Notification\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Notification\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Notification\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Person\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Person\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Person\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Person\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Person\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\Error.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_Layout.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_LoginPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_NavigationPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Shared\_ValidationScriptsPartial.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Ingredient\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Ingredient\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Ingredient\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Ingredient\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Ingredient\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Product\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Product\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Product\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Product\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Product\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Recipe\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Recipe\Delete.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Recipe\Details.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Recipe\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Recipe\Index.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\Cleaning\Create.cshtml" />
+      <UpToDateCheckInput Remove="Views\Cleaning\Delete.cshtml" />
+      <UpToDateCheckInput Remove="Views\Cleaning\Details.cshtml" />
+      <UpToDateCheckInput Remove="Views\Cleaning\Edit.cshtml" />
+      <UpToDateCheckInput Remove="Views\Cleaning\Index.cshtml" />
+      <UpToDateCheckInput Remove="Views\Person\Create.cshtml" />
+      <UpToDateCheckInput Remove="Views\Person\Delete.cshtml" />
+      <UpToDateCheckInput Remove="Views\Person\Details.cshtml" />
+      <UpToDateCheckInput Remove="Views\Person\Edit.cshtml" />
+      <UpToDateCheckInput Remove="Views\Person\Index.cshtml" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+</Project>

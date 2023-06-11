@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background-color: #CFE2F3;">
+    
+    <div class="top-nav">
+        <div class="row">
+            <div class="col-auto" style="align-self: start">
+                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="col row justify-content-evenly">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Meal Planner</a>
+                <ul class="navbar-nav col-1"><partial name="_LanguageSelection"/></ul>
+                <div style="word-wrap: break-word; flex-grow: 0.8" class="navbar-collapse collapse d-flex justify-content-evenly">
+                    
+                    <ul class="navbar-nav flex-row">
+                        <!--<li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>-->
+                    </ul>
+                    <ul class="col-1"></ul>
+                    <partial name="_LoginPartial"/>
+                </div>
+            </div>
+        </div>
+    </div>
+ </nav>
