@@ -25,6 +25,15 @@ dotnet aspnet-codegenerator controller -m Domain.App.UserProduct -name UserProdu
 dotnet aspnet-codegenerator controller -m Domain.App.RecipeProduct -name RecipeProductController -outDir Controllers -dc ApplicationDbContext  -udl --referenceScriptLibraries -f
 
 
+## API
+### inside WebApp
+dotnet aspnet-codegenerator controller -m Domain.App.Product -name ProductsController -outDir ApiControllers -api -dc ApplicationDbContext  -udl -f
+dotnet aspnet-codegenerator controller -m Domain.App.Recipe -name RecipeController -outDir ApiControllers -api -dc ApplicationDbContext  -udl -f
+dotnet aspnet-codegenerator controller -m Domain.App.UserProduct -name UserProductController -outDir ApiControllers -api -dc ApplicationDbContext  -udl -f
+dotnet aspnet-codegenerator controller -m Domain.App.RecipeProduct -name RecipeProductController -outDir ApiControllers -api -dc ApplicationDbContext  -udl -f
+
+
+
 ## Identity
 ### inside WebApp
 dotnet aspnet-codegenerator identity -dc DAL.EF.App.ApplicationDbContext --userClass AppUser -f
