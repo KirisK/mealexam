@@ -1,6 +1,5 @@
 using Asp.Versioning;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
@@ -13,6 +12,9 @@ using WebApp.Extensions;
 
 namespace WebApp.ApiControllers
 {
+    /// <summary>
+    /// API controller for user's products
+    /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
@@ -22,6 +24,11 @@ namespace WebApp.ApiControllers
         private readonly ApplicationDbContext _context;
         private readonly UserProductMapper _mapper;
 
+        /// <summary>
+        /// Constructor of  user's products controller
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="mapper"></param>
         public UserProductController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
@@ -29,6 +36,10 @@ namespace WebApp.ApiControllers
         }
 
         // GET: api/UserProduct
+        /// <summary>
+        /// List of products that belong to user
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserProduct>>> GetUserProducts()
         {
@@ -41,6 +52,11 @@ namespace WebApp.ApiControllers
         }
 
         // GET: api/UserProduct/5
+        /// <summary>
+        /// List of products that belong to user by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<UserProduct>> GetUserProduct(Guid id)
         {
@@ -59,6 +75,12 @@ namespace WebApp.ApiControllers
 
         // PUT: api/UserProduct/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Editing products that belong to user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userProduct"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserProduct(Guid id, UserProduct userProduct)
         {
@@ -75,6 +97,11 @@ namespace WebApp.ApiControllers
 
         // POST: api/UserProduct
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Adding new products to user's product list
+        /// </summary>
+        /// <param name="userProduct"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<UserProduct>> PostUserProduct(UserProduct userProduct)
         {
@@ -93,6 +120,11 @@ namespace WebApp.ApiControllers
         }
 
         // DELETE: api/UserProduct/5
+        /// <summary>
+        /// Delete products that belong to user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserProduct(Guid id)
         {

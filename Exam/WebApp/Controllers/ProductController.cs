@@ -1,25 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using App.BLL.Contracts;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using DAL.EF.App;
 using Microsoft.AspNetCore.Authorization;
 using Public.DTO.v1;
-using WebApp.Extensions;
 using WebApp.HttpClient;
 using WebApp.ViewModels.Product;
 
 namespace WebApp.Controllers
 {
+    /// <summary>
+    /// UI product controller
+    /// </summary>
     public class ProductController : Controller
     {
         private readonly JwtHelper _jwtHelper;
         private readonly IProductClient _productClient;
 
+        /// <summary>
+        /// Constructor for product controller
+        /// </summary>
+        /// <param name="jwtHelper"></param>
+        /// <param name="productClient"></param>
         public ProductController(JwtHelper jwtHelper, IProductClient productClient)
         {
             _jwtHelper = jwtHelper;
@@ -27,6 +27,10 @@ namespace WebApp.Controllers
         }
 
         // GET: Product
+        /// <summary>
+        /// List of products
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> Index()
         {
             var model = new IndexViewModel();
@@ -53,6 +57,10 @@ namespace WebApp.Controllers
         }
 
         // GET: Product/Create
+        /// <summary>
+        /// Creation of new product
+        /// </summary>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
@@ -62,6 +70,11 @@ namespace WebApp.Controllers
         // POST: Product/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Creation of new product, enabled only for admin
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -82,6 +95,11 @@ namespace WebApp.Controllers
         }
 
         // GET: Product/Edit/5
+        /// <summary>
+        /// Editing product, enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Guid? id)
         {
@@ -102,6 +120,12 @@ namespace WebApp.Controllers
         // POST: Product/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Editing product, enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -127,6 +151,11 @@ namespace WebApp.Controllers
         }
 
         // GET: Product/Delete/5
+        /// <summary>
+        /// Deleting of product from list, enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid? id)
         {
@@ -145,6 +174,11 @@ namespace WebApp.Controllers
         }
 
         // POST: Product/Delete/5
+        /// <summary>
+        /// Deleting of product from list, enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]

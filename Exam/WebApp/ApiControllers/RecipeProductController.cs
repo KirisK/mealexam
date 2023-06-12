@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
@@ -13,6 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.ApiControllers
 {
+    /// <summary>
+    /// API controller for recipe's products
+    /// </summary>
     [ApiController]
     [ApiVersion( "1.0" )]
     [Route("api/v{version:apiVersion}/[controller]/[action]")]
@@ -21,12 +19,20 @@ namespace WebApp.ApiControllers
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Constructor of recipe's products controller
+        /// </summary>
+        /// <param name="context"></param>
         public RecipeProductController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         // GET: api/RecipeProduct
+        /// <summary>
+        /// List of recipe ingredients
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecipeProduct>>> GetRecipesProducts()
         {
@@ -34,10 +40,15 @@ namespace WebApp.ApiControllers
           {
               return NotFound();
           }
-            return await _context.RecipesProducts.ToListAsync();
+          return await _context.RecipesProducts.ToListAsync();
         }
 
         // GET: api/RecipeProduct/5
+        /// <summary>
+        /// Get recipe ingredients list by their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<RecipeProduct>> GetRecipeProduct(Guid id)
         {
@@ -45,7 +56,7 @@ namespace WebApp.ApiControllers
           {
               return NotFound();
           }
-            var recipeProduct = await _context.RecipesProducts.FindAsync(id);
+          var recipeProduct = await _context.RecipesProducts.FindAsync(id);
 
             if (recipeProduct == null)
             {
@@ -57,6 +68,12 @@ namespace WebApp.ApiControllers
 
         // PUT: api/RecipeProduct/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Editing products in recipe ingredients list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="recipeProduct"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRecipeProduct(Guid id, RecipeProduct recipeProduct)
         {
@@ -88,6 +105,11 @@ namespace WebApp.ApiControllers
 
         // POST: api/RecipeProduct
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Adding new products to recipe ingredients list
+        /// </summary>
+        /// <param name="recipeProduct"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<RecipeProduct>> PostRecipeProduct(RecipeProduct recipeProduct)
         {
@@ -95,7 +117,7 @@ namespace WebApp.ApiControllers
           {
               return Problem("Entity set 'ApplicationDbContext.RecipesProducts'  is null.");
           }
-            _context.RecipesProducts.Add(recipeProduct);
+          _context.RecipesProducts.Add(recipeProduct);
             try
             {
                 await _context.SaveChangesAsync();
@@ -116,6 +138,11 @@ namespace WebApp.ApiControllers
         }
 
         // DELETE: api/RecipeProduct/5
+        /// <summary>
+        /// Delete products from recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipeProduct(Guid id)
         {

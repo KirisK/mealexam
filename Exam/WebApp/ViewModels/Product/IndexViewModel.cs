@@ -1,4 +1,4 @@
-using Public.DTO.v1;
+#pragma warning disable 1591
 
 namespace WebApp.ViewModels.Product;
 

@@ -2,6 +2,8 @@ using System.Net.Http.Headers;
 using App.BLL.Contracts;
 using Public.DTO.v1;
 
+#pragma warning disable 1591
+
 namespace WebApp.HttpClient;
 
 public class RecipeClient : IRecipeClient

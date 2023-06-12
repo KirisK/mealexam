@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Public.DTO.v1;
 
+#pragma warning disable 1591
+
 namespace WebApp.ViewModels.Recipe;
 
 public class AddProductViewModel

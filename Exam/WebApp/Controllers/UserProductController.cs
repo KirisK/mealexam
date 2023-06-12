@@ -1,26 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using App.BLL.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using DAL.EF.App;
 using Microsoft.AspNetCore.Authorization;
 using Public.DTO.v1;
-using Public.DTO.v1.Mappers;
 using WebApp.Extensions;
 using WebApp.HttpClient;
 using WebApp.ViewModels.UserProduct;
 
 namespace WebApp.Controllers
 {
+    /// <summary>
+    /// UI user's product controller
+    /// </summary>
     public class UserProductController : Controller
     {
         private readonly IProductClient _productClient;
         private readonly JwtHelper _jwtHelper;
 
+        /// <summary>
+        /// Constructor of  user's products controller
+        /// </summary>
+        /// <param name="productClient"></param>
+        /// <param name="jwtHelper"></param>
         public UserProductController(IProductClient productClient, JwtHelper jwtHelper)
         {
             _productClient = productClient;
@@ -29,6 +30,10 @@ namespace WebApp.Controllers
         
 
         // GET: UserProduct/Create
+        /// <summary>
+        /// Create new product that belongs to user
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         public async Task<IActionResult> Create()
         {
@@ -41,6 +46,11 @@ namespace WebApp.Controllers
         // POST: UserProduct/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Create new product that belongs to user using additional view model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -72,6 +82,11 @@ namespace WebApp.Controllers
         }
 
         // GET: UserProduct/Edit/5
+        /// <summary>
+        /// Edit product that belongs to user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize]
         public async Task<IActionResult> Edit(Guid? id)
         {
@@ -91,6 +106,12 @@ namespace WebApp.Controllers
         // POST: UserProduct/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Edit product that belongs to user, if amount is 0, its deleted. If its used in user's recipe it cant be deleted.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userProduct"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]

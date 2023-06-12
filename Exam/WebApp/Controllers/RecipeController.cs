@@ -9,12 +9,21 @@ using Product = Public.DTO.v1.Product;
 
 namespace WebApp.Controllers
 {
+    /// <summary>
+    /// UI controller for recipe
+    /// </summary>
     public class RecipeController : Controller
     {
         private readonly IRecipeClient _recipeClient;
         private readonly IProductClient _productClient;
         private readonly JwtHelper _jwtHelper;
 
+        /// <summary>
+        /// Constructor for recipe controller
+        /// </summary>
+        /// <param name="recipeClient"></param>
+        /// <param name="productClient"></param>
+        /// <param name="jwtHelper"></param>
         public RecipeController(
             IRecipeClient recipeClient,
             IProductClient productClient,
@@ -26,6 +35,10 @@ namespace WebApp.Controllers
         }
 
         // GET: Recipe
+        /// <summary>
+        /// List of recipes
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> Index()
         {
             var userRecipes = await _recipeClient.GetAllRecipes(_jwtHelper.GetJwt(User));
@@ -38,6 +51,11 @@ namespace WebApp.Controllers
         }
 
         // GET: Recipe/Details/5
+        /// <summary>
+        /// Recipe details
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -64,6 +82,11 @@ namespace WebApp.Controllers
             return resp.IsSuccessful ? resp.Value! : Array.Empty<UserProduct>();
         }
 
+        /// <summary>
+        /// Adding products to recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> AddProduct(Guid? id)
         {
             if (id == null)
@@ -85,6 +108,11 @@ namespace WebApp.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Adding products to recipe using additional view model
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddProduct(AddProductViewModel model)
@@ -114,6 +142,10 @@ namespace WebApp.Controllers
         }
 
         // GET: Recipe/Create
+        /// <summary>
+        /// Create new recipe
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Create()
         {
             var recipe = new Recipe();
@@ -125,6 +157,11 @@ namespace WebApp.Controllers
         // POST: Recipe/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Create new recipe
+        /// </summary>
+        /// <param name="recipe"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Recipe recipe)
@@ -142,6 +179,11 @@ namespace WebApp.Controllers
         }
 
         // GET: Recipe/Edit/5
+        /// <summary>
+        /// Edit recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -161,6 +203,12 @@ namespace WebApp.Controllers
         // POST: Recipe/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Edit recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="recipe"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, Recipe recipe)
@@ -184,6 +232,11 @@ namespace WebApp.Controllers
         }
 
         // GET: Recipe/Delete/5
+        /// <summary>
+        /// Delete recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -201,6 +254,11 @@ namespace WebApp.Controllers
         }
 
         // POST: Recipe/Delete/5
+        /// <summary>
+        /// Confirm deleting of recipe
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)

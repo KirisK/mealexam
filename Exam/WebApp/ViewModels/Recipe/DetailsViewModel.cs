@@ -1,5 +1,7 @@
 namespace WebApp.ViewModels.Recipe;
 
+#pragma warning disable 1591
+
 public class DetailsViewModel
 {
     public Public.DTO.v1.Recipe Recipe { get; set; } = default!;

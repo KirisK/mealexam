@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Asp.Versioning;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
@@ -16,6 +11,9 @@ using WebApp.Extensions;
 
 namespace WebApp.ApiControllers
 {
+    /// <summary>
+    /// API controller for the product
+    /// </summary>
     [ApiController]
     [ApiVersion( "1.0" )]
     [Route("api/v{version:apiVersion}/[controller]")]
@@ -25,6 +23,11 @@ namespace WebApp.ApiControllers
         private readonly ApplicationDbContext _context;
         private readonly ProductMapper _mapper;
 
+        /// <summary>
+        /// Constructor of product controller
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="mapper"></param>
         public ProductController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
@@ -32,6 +35,11 @@ namespace WebApp.ApiControllers
         }
 
         // GET: api/Products
+        /// <summary>
+        /// Get list of products that belong to user
+        /// </summary>
+        /// <param name="filterOutOwned"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts(bool filterOutOwned = false)
         {
@@ -55,6 +63,11 @@ namespace WebApp.ApiControllers
         }
 
         // GET: api/Products/5
+        /// <summary>
+        /// Get list of products by their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(Guid id)
         {
@@ -73,6 +86,12 @@ namespace WebApp.ApiControllers
 
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Editing of products enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutProduct(Guid id, Product product)
@@ -91,6 +110,11 @@ namespace WebApp.ApiControllers
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Add new products to general list of products, enabled only for admin
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Product>> PostProduct(Product product)
@@ -104,6 +128,11 @@ namespace WebApp.ApiControllers
         }
 
         // DELETE: api/Products/5
+        /// <summary>
+        /// Deleting product from general list of products, enabled only for admin
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProduct(Guid id)

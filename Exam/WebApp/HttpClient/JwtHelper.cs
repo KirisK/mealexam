@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Domain.App.Identity;
-using Microsoft.AspNetCore.Identity;
 using WebApp.Extensions;
+
+#pragma warning disable 1591
 
 namespace WebApp.HttpClient;
 
