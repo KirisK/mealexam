@@ -1,0 +1,39 @@
+@model WebApp.ViewModels.Recipe.AddProductViewModel
+
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<h1>Add product to @Model.Recipe.RecipeName</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddProduct">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="RecipeProduct.ProductId" class="control-label">Product</label>
+                <select asp-for="RecipeProduct.ProductId" asp-items="Model.Products" class="form-control"></select>
+                <span asp-validation-for="RecipeProduct.ProductId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RecipeProduct.RequiredAmount" class="control-label"></label>
+                <input asp-for="RecipeProduct.RequiredAmount" class="form-control" />
+                <span asp-validation-for="RecipeProduct.RequiredAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RecipeProduct.Units" class="control-label"></label>
+                <input asp-for="RecipeProduct.Units" class="form-control" />
+                <span asp-validation-for="RecipeProduct.Units" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="RecipeProduct.RecipeId"/>
+            <div class="form-group">
+                <input type="submit" value="Add Product" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
