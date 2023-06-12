@@ -48,8 +48,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, Guid>, I
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<UserProduct>().HasKey(l => new { l.AppUserId, l.ProductId });
-        builder.Entity<RecipeProduct>().HasKey(rp => new { rp.RecipeId, rp.ProductId });
+        // builder.Entity<UserProduct>().HasKey(l => new { l.AppUserId, l.ProductId });
+        // builder.Entity<RecipeProduct>().HasKey(rp => new { rp.RecipeId, rp.ProductId });
         
         // disable cascade delete
         foreach (

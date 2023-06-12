@@ -2,174 +2,127 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using App.BLL.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
-using Domain.App;
+using Microsoft.AspNetCore.Authorization;
+using Public.DTO.v1;
+using Public.DTO.v1.Mappers;
+using WebApp.Extensions;
+using WebApp.HttpClient;
+using WebApp.ViewModels.UserProduct;
 
 namespace WebApp.Controllers
 {
     public class UserProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductClient _productClient;
+        private readonly JwtHelper _jwtHelper;
 
-        public UserProductController(ApplicationDbContext context)
+        public UserProductController(IProductClient productClient, JwtHelper jwtHelper)
         {
-            _context = context;
+            _productClient = productClient;
+            _jwtHelper = jwtHelper;
         }
-
-        // GET: UserProduct
-        public async Task<IActionResult> Index()
-        {
-            var applicationDbContext = _context.UserProducts.Include(u => u.AppUser).Include(u => u.Product);
-            return View(await applicationDbContext.ToListAsync());
-        }
-
-        // GET: UserProduct/Details/5
-        public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null || _context.UserProducts == null)
-            {
-                return NotFound();
-            }
-
-            var userProduct = await _context.UserProducts
-                .Include(u => u.AppUser)
-                .Include(u => u.Product)
-                .FirstOrDefaultAsync(m => m.AppUserId == id);
-            if (userProduct == null)
-            {
-                return NotFound();
-            }
-
-            return View(userProduct);
-        }
+        
 
         // GET: UserProduct/Create
-        public IActionResult Create()
+        [Authorize]
+        public async Task<IActionResult> Create()
         {
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName");
-            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "ProductName");
-            return View();
+            var model = new CreateViewModel();
+            model.Products = await GetProductsSelectList();
+            model.UserProduct = new Public.DTO.v1.UserProduct {AppUserId = User.GetUserId()!.Value};
+            return View(model);
         }
 
         // POST: UserProduct/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AvailableAmount,ProductId,AppUserId,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] UserProduct userProduct)
+        public async Task<IActionResult> Create(CreateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                userProduct.AppUserId = Guid.NewGuid();
-                _context.Add(userProduct);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var resp = await _productClient.AddUserProduct(_jwtHelper.GetJwt(User), model.UserProduct);
+                if (resp.IsSuccessful)
+                {
+                    return RedirectToAction(nameof(Index), nameof(Product));
+                }
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", userProduct.AppUserId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "ProductName", userProduct.ProductId);
-            return View(userProduct);
+            model.Products = await GetProductsSelectList();
+            return View(model);
+        }
+
+        private async Task<List<SelectListItem>> GetProductsSelectList()
+        {
+            var products = await _productClient.GetAllProducts(_jwtHelper.GetJwt(User), true);
+            if (products.IsSuccessful)
+            {
+                return products.Value!
+                    .Select(p => new SelectListItem {Value = p.Id.ToString(), Text = p.ProductName})
+                    .ToList();
+            }
+
+            return new List<SelectListItem>();
         }
 
         // GET: UserProduct/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.UserProducts == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var userProduct = await _context.UserProducts.FindAsync(id);
-            if (userProduct == null)
+            var userProduct = await _productClient.GetUserProduct(_jwtHelper.GetJwt(User), id.Value);
+            if (!userProduct.IsSuccessful)
             {
                 return NotFound();
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", userProduct.AppUserId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "ProductName", userProduct.ProductId);
-            return View(userProduct);
+            return View(userProduct.Value!);
         }
 
         // POST: UserProduct/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("AvailableAmount,ProductId,AppUserId,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] UserProduct userProduct)
+        public async Task<IActionResult> Edit(Guid id, UserProduct userProduct)
         {
-            if (id != userProduct.AppUserId)
+            if (id != userProduct.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                return View(userProduct);
+            }
+
+            if (userProduct.AvailableAmount <= 0)
+            {
+                var deleteResp = await _productClient.DeleteUserProduct(_jwtHelper.GetJwt(User), userProduct.Id);
+                if (deleteResp.IsSuccessful)
                 {
-                    _context.Update(userProduct);
-                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index), nameof(Product));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserProductExists(userProduct.AppUserId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", userProduct.AppUserId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "ProductName", userProduct.ProductId);
-            return View(userProduct);
-        }
 
-        // GET: UserProduct/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null || _context.UserProducts == null)
-            {
-                return NotFound();
-            }
-
-            var userProduct = await _context.UserProducts
-                .Include(u => u.AppUser)
-                .Include(u => u.Product)
-                .FirstOrDefaultAsync(m => m.AppUserId == id);
-            if (userProduct == null)
-            {
-                return NotFound();
-            }
-
-            return View(userProduct);
-        }
-
-        // POST: UserProduct/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            if (_context.UserProducts == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.UserProducts'  is null.");
-            }
-            var userProduct = await _context.UserProducts.FindAsync(id);
-            if (userProduct != null)
-            {
-                _context.UserProducts.Remove(userProduct);
+                return Problem($"Could not remove product {userProduct.Id}");
             }
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool UserProductExists(Guid id)
-        {
-          return (_context.UserProducts?.Any(e => e.AppUserId == id)).GetValueOrDefault();
+            var resp = await _productClient.UpdateUserProduct(_jwtHelper.GetJwt(User), userProduct);
+            if (resp.IsSuccessful)
+            {
+                return RedirectToAction(nameof(Index), nameof(Product));
+            }
+            return View(userProduct);
         }
     }
 }

@@ -2,10 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using Domain.App;
 using Domain.App.Identity;
 using Domain.Base;
+using Shared.Contracts.Base.Entity;
 
 namespace Public.DTO.v1
 {
-    public class Recipe : DomainEntityMetaId
+    public class Recipe : EntityId
     {
         [MaxLength(64)]
         public string RecipeName { get; set; }  = default!;
@@ -22,8 +23,6 @@ namespace Public.DTO.v1
         
         
         public Guid AppUserId { get; set; }
-
-        public AppUser? AppUser { get; set; }
 
         
     }

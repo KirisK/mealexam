@@ -32,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\App.BLL.Contracts\App.BLL.Contracts.csproj" />
       <ProjectReference Include="..\DAL.EF.App\DAL.EF.App.csproj" />
       <ProjectReference Include="..\Domain.App\Domain.App.csproj" />
       <ProjectReference Include="..\Public.DTO.v1\Public.DTO.v1.csproj" />

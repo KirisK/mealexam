@@ -1,59 +1,50 @@
-@model IEnumerable<Domain.App.Product>
+@model WebApp.ViewModels.Product.IndexViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Products";
+    var isAdmin = User.IsInRole("Admin");
 }
 
-<h1>Index</h1>
+<h1>@(isAdmin ? "" : "My ")Products</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    @if (isAdmin)
+    {
+        <a asp-action="Create">Create New</a>
+    }
+    else
+    {
+        <a asp-controller="UserProduct" asp-action="Create">Add product</a>
+    }
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+@if (isAdmin)
+{
+    <div class="list-group">
+        @foreach (var item in Model.Products!)
+        {
+            <div class="d-flex list-group-item list-group-item-action">
+                @(item.ProductName)
+                <span class="flex-grow-1"></span>
+                <span>
+                    <a class="badge badge-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a class="badge badge-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </span>
+            </div>
+        }
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="list-group">
+        @foreach (var item in Model.UserProducts!)
+        {
+            <div class="d-flex list-group-item list-group-item-action">
+                <span class="pl-2">@item.Product!.ProductName</span>
+                <span class="pr-2 badge badge-primary badge-pill">@item.AvailableAmount @item.Units</span>
+                <span class="flex-grow-1"></span>
+                <a class="badge badge-info" asp-controller="UserProduct" asp-action="Edit" asp-route-id="@item.Id">Edit Amount</a>
+            </div>
+        }
+    </div>
+}

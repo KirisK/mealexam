@@ -1,52 +1,28 @@
-@model IEnumerable<Domain.App.Recipe>
+@model IEnumerable<Public.DTO.v1.Recipe>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Recipes";
 }
 
-<h1>Index</h1>
+<h1>@(User.IsInRole("User") ? "My " : "")Recipies</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.RecipeName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RecipeTimeNeeded)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsPublic)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servings)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AppUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Name</th>
+        <th>Preparation time</th>
+        <th>@Html.DisplayNameFor(model => model.Description)</th>
+        <th>@Html.DisplayNameFor(model => model.Servings)</th>
+        <th>Is public?</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+    @foreach (var item in Model)
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.RecipeName)
@@ -55,35 +31,20 @@
                 @Html.DisplayFor(modelItem => item.RecipeTimeNeeded)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsPublic)
+                @Html.Raw(item.Description.Substring(0, Int32.Min(item.Description.Length, 35)))
+                @(item.Description.Length > 35 ? "..." : "")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Servings)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.AppUser!.FirstName)
+                @Html.DisplayFor(modelItem => item.IsPublic)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.CreatedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>

@@ -1,56 +1,125 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using App.BLL.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using DAL.EF.App;
-using Domain.App;
+using Public.DTO.v1;
+using WebApp.Extensions;
+using WebApp.HttpClient;
+using WebApp.ViewModels.Recipe;
+using Product = Public.DTO.v1.Product;
 
 namespace WebApp.Controllers
 {
     public class RecipeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRecipeClient _recipeClient;
+        private readonly IProductClient _productClient;
+        private readonly JwtHelper _jwtHelper;
 
-        public RecipeController(ApplicationDbContext context)
+        public RecipeController(
+            IRecipeClient recipeClient,
+            IProductClient productClient,
+            JwtHelper jwtHelper)
         {
-            _context = context;
+            _recipeClient = recipeClient;
+            _jwtHelper = jwtHelper;
+            _productClient = productClient;
         }
 
         // GET: Recipe
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Recipes.Include(r => r.AppUser);
-            return View(await applicationDbContext.ToListAsync());
+            var userRecipes = await _recipeClient.GetAllRecipes(_jwtHelper.GetJwt(User));
+            if (userRecipes.IsSuccessful)
+            {
+                return View(userRecipes.Value);
+            }
+
+            return NotFound();
         }
 
         // GET: Recipe/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            if (id == null || _context.Recipes == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var recipe = await _context.Recipes
-                .Include(r => r.AppUser)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (recipe == null)
+            var recipe = await _recipeClient.GetRecipe(_jwtHelper.GetJwt(User), id.Value);
+            if (!recipe.IsSuccessful)
             {
                 return NotFound();
             }
 
-            return View(recipe);
+            var model = new DetailsViewModel();
+            model.Recipe = recipe.Value!;
+            model.UserProducts = await GetUserProducts();
+
+            return View(model);
+        }
+
+        private async Task<IEnumerable<UserProduct>> GetUserProducts()
+        {
+            var resp = await _productClient.GetUserProducts(_jwtHelper.GetJwt(User));
+            return resp.IsSuccessful ? resp.Value! : Array.Empty<UserProduct>();
+        }
+
+        public async Task<IActionResult> AddProduct(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var recipe = await _recipeClient.GetRecipe(_jwtHelper.GetJwt(User), id.Value);
+            if (!recipe.IsSuccessful)
+            {
+                return NotFound();
+            }
+
+            var model = new AddProductViewModel();
+            model.Recipe = recipe.Value!;
+            model.Products = await GetAllProductsSelectItems();
+            model.RecipeProduct = new RecipeProduct {RecipeId = id.Value};
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddProduct(AddProductViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var resp = await _recipeClient.AddRecipeProduct(_jwtHelper.GetJwt(User), model.RecipeProduct);
+                if (resp.IsSuccessful)
+                {
+                    return RedirectToAction(nameof(Details), new { id = model.RecipeProduct.RecipeId });
+                }
+            }
+
+            model.Recipe = (await _recipeClient.GetRecipe(_jwtHelper.GetJwt(User), model.RecipeProduct.RecipeId))
+                .Value!;
+            model.RecipeProduct = new RecipeProduct {RecipeId = model.RecipeProduct.RecipeId};
+            return View(model);
+        }
+
+        private async Task<List<SelectListItem>> GetAllProductsSelectItems()
+        {
+            var products = (await _productClient.GetAllProducts(_jwtHelper.GetJwt(User))).Value ??
+                           Array.Empty<Product>();
+            return products
+                .Select(p => new SelectListItem {Value = p.Id.ToString(), Text = p.ProductName})
+                .ToList();
         }
 
         // GET: Recipe/Create
         public IActionResult Create()
         {
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName");
-            return View();
+            var recipe = new Recipe();
+            recipe.AppUserId = User.GetUserId()!.Value;
+            
+            return View(recipe);
         }
 
         // POST: Recipe/Create
@@ -58,34 +127,35 @@ namespace WebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RecipeName,RecipeTimeNeeded,Description,IsPublic,Servings,AppUserId,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] Recipe recipe)
+        public async Task<IActionResult> Create(Recipe recipe)
         {
             if (ModelState.IsValid)
             {
-                recipe.Id = Guid.NewGuid();
-                _context.Add(recipe);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var resp = await _recipeClient.AddRecipe(_jwtHelper.GetJwt(User), recipe);
+                if (resp.IsSuccessful)
+                {
+                    return RedirectToAction(nameof(Details), new { id = resp.Value!.Id });
+                }
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", recipe.AppUserId);
+
             return View(recipe);
         }
 
         // GET: Recipe/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.Recipes == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var recipe = await _context.Recipes.FindAsync(id);
-            if (recipe == null)
+            var recipe = await _recipeClient.GetRecipe(_jwtHelper.GetJwt(User), id.Value);
+            if (!recipe.IsSuccessful || recipe.Value == null)
             {
                 return NotFound();
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", recipe.AppUserId);
-            return View(recipe);
+
+            return View(recipe.Value);
         }
 
         // POST: Recipe/Edit/5
@@ -93,54 +163,41 @@ namespace WebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("RecipeName,RecipeTimeNeeded,Description,IsPublic,Servings,AppUserId,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] Recipe recipe)
+        public async Task<IActionResult> Edit(Guid id, Recipe recipe)
         {
             if (id != recipe.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(recipe);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!RecipeExists(recipe.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                return View(recipe);
+            }
+            
+            var resp = await _recipeClient.UpdateRecipe(_jwtHelper.GetJwt(User), recipe);
+            if (resp.IsSuccessful)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "FirstName", recipe.AppUserId);
             return View(recipe);
         }
 
         // GET: Recipe/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _context.Recipes == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var recipe = await _context.Recipes
-                .Include(r => r.AppUser)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (recipe == null)
+            var resp = await _recipeClient.GetRecipe(_jwtHelper.GetJwt(User), id.Value);
+            if (!resp.IsSuccessful)
             {
                 return NotFound();
             }
 
-            return View(recipe);
+            return View(resp.Value!);
         }
 
         // POST: Recipe/Delete/5
@@ -148,34 +205,9 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_context.Recipes == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Recipes'  is null.");
-            }
-            var recipe = await _context.Recipes.FindAsync(id);
-            if (recipe != null)
-            {
-                _context.Recipes.Remove(recipe);
-            }
+            var resp = await _recipeClient.DeleteAsync(_jwtHelper.GetJwt(User), id);
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return resp.IsSuccessful ? RedirectToAction(nameof(Index)) : Problem("Can't delete?");
         }
-
-        private bool RecipeExists(Guid id)
-        {
-          return (_context.Recipes?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
-        
-        // GET: Recipes
-        [HttpGet, ActionName("Recipes")]
-        public async Task<IActionResult> GetRecipes([FromQuery] Guid? userId)
-        {
-            
-            var query = _context.Recipes.Where(e => e.AppUserId == userId).AsSingleQuery();
-            
-            return View(await query.ToListAsync());
-        }
-        
     }
 }

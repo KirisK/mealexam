@@ -139,8 +139,8 @@ namespace DAL.EF.App.Migrations
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -204,10 +204,8 @@ namespace DAL.EF.App.Migrations
 
             modelBuilder.Entity("Domain.App.RecipeProduct", b =>
                 {
-                    b.Property<Guid>("RecipeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -217,11 +215,18 @@ namespace DAL.EF.App.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RecipeId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("RequiredAmount")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Units")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -230,19 +235,22 @@ namespace DAL.EF.App.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.HasKey("RecipeId", "ProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("RecipeId");
 
                     b.ToTable("RecipesProducts");
                 });
 
             modelBuilder.Entity("Domain.App.UserProduct", b =>
                 {
-                    b.Property<Guid>("AppUserId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("AppUserId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("AvailableAmount")
@@ -255,8 +263,12 @@ namespace DAL.EF.App.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Units")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -265,7 +277,9 @@ namespace DAL.EF.App.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.HasKey("AppUserId", "ProductId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ProductId");
 

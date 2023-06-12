@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Public.DTO.v1;
 using WebApp.ViewModels;
 
 #pragma warning disable 1591
@@ -17,6 +18,10 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        if (User.IsInRole("User"))
+        {
+            return RedirectToAction("Index", nameof(Recipe));
+        }
         return View();
     }
 

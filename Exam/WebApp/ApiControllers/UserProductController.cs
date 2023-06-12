@@ -1,58 +1,60 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Asp.Versioning;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
-using Domain.App;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Public.DTO.v1;
+using Public.DTO.v1.Error;
+using Public.DTO.v1.Mappers;
+using WebApp.Extensions;
 
 namespace WebApp.ApiControllers
 {
     [ApiController]
-    [ApiVersion( "1.0" )]
-    [Route("api/v{version:apiVersion}/[controller]/[action]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserProductController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserProductMapper _mapper;
 
-        public UserProductController(ApplicationDbContext context)
+        public UserProductController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = new UserProductMapper(mapper);
         }
 
         // GET: api/UserProduct
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserProduct>>> GetUserProducts()
         {
-          if (_context.UserProducts == null)
-          {
-              return NotFound();
-          }
-            return await _context.UserProducts.ToListAsync();
+            var userProducts = await _context.UserProducts
+                .Include(upo => upo.Product)
+                .Where(up => up.AppUserId == User.GetUserId())
+                .ToListAsync();
+
+            return Ok(userProducts.Select(up => _mapper.Map(up)));
         }
 
         // GET: api/UserProduct/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserProduct>> GetUserProduct(Guid id)
         {
-          if (_context.UserProducts == null)
-          {
-              return NotFound();
-          }
-            var userProduct = await _context.UserProducts.FindAsync(id);
+            var userProduct = await _context.UserProducts
+                .Include(up => up.Product)
+                .Where(up => up.AppUserId == User.GetUserId() || User.IsInRole("Admin"))
+                .FirstOrDefaultAsync(up => up.Id == id);
 
             if (userProduct == null)
             {
                 return NotFound();
             }
 
-            return userProduct;
+            return Ok(_mapper.Map(userProduct));
         }
 
         // PUT: api/UserProduct/5
@@ -60,28 +62,13 @@ namespace WebApp.ApiControllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserProduct(Guid id, UserProduct userProduct)
         {
-            if (id != userProduct.AppUserId)
+            if (id != userProduct.Id || userProduct.AppUserId != User.GetUserId())
             {
                 return BadRequest();
             }
 
-            _context.Entry(userProduct).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _context.UserProducts.Entry(_mapper.Map(userProduct)).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -91,39 +78,28 @@ namespace WebApp.ApiControllers
         [HttpPost]
         public async Task<ActionResult<UserProduct>> PostUserProduct(UserProduct userProduct)
         {
-          if (_context.UserProducts == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.UserProducts'  is null.");
-          }
-            _context.UserProducts.Add(userProduct);
-            try
+            var toAdd = _mapper.Map(userProduct);
+            toAdd.AppUserId = User.GetUserId()!.Value;
+            var isValidProduct = await _context.Products.AnyAsync(p => p.Id == userProduct.ProductId);
+            if (!isValidProduct)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (UserProductExists(userProduct.AppUserId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound(new Message
+                    {Messages = new[] {"Invalid product reference", $"Product {userProduct.ProductId} not found"}});
             }
 
-            return CreatedAtAction("GetUserProduct", new { id = userProduct.AppUserId }, userProduct);
+            _context.UserProducts.Add(toAdd);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction("GetUserProduct", new {id = toAdd.Id}, toAdd);
         }
 
         // DELETE: api/UserProduct/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserProduct(Guid id)
         {
-            if (_context.UserProducts == null)
-            {
-                return NotFound();
-            }
-            var userProduct = await _context.UserProducts.FindAsync(id);
+            var userProduct = await _context.UserProducts
+                .Where(up => up.AppUserId == User.GetUserId() || User.IsInRole("Admin"))
+                .FirstOrDefaultAsync(up => up.Id == id);
+
             if (userProduct == null)
             {
                 return NotFound();
@@ -133,11 +109,6 @@ namespace WebApp.ApiControllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool UserProductExists(Guid id)
-        {
-            return (_context.UserProducts?.Any(e => e.AppUserId == id)).GetValueOrDefault();
         }
     }
 }

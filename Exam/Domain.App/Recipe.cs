@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.App.Identity;
 using Domain.Base;
 
@@ -19,7 +20,7 @@ namespace Domain.App
 
         public int Servings { get; set; }
         
-        
+        [ForeignKey(nameof(AppUser))]
         public Guid AppUserId { get; set; }
 
         public AppUser? AppUser { get; set; }

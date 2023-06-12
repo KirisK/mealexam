@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using App.BLL.Contracts;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using DAL.EF.App;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Public.DTO.v1.Mappers;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApp.HttpClient;
 using WebApp.Seeding;
 using WebApp.Swagger;
 
@@ -28,6 +30,8 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI()
     .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<JwtHelper>();
 
 builder.Services.AddControllersWithViews();
 
@@ -54,6 +58,8 @@ apiVersioningBuilder.AddApiExplorer(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient<IRecipeClient, RecipeClient>();
+builder.Services.AddHttpClient<IProductClient, ProductClient>();
 
 #region Swagger
 
@@ -112,7 +118,6 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -138,7 +143,6 @@ app.UseEndpoints(endpoints =>
     endpoints.MapRazorPages();
 });
 #pragma warning restore ASP0014
-
 
 app.UseSwagger();
 

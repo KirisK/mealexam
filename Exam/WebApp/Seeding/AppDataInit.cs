@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Public.DTO.v1;
 using Product = Domain.App.Product;
 using Recipe = Domain.App.Recipe;
+using RecipeProduct = Domain.App.RecipeProduct;
 
 #pragma warning disable 1591
 
@@ -131,7 +132,7 @@ public class AppDataInit
         user.LastName = "Adminович";
         user.UserName = user.Email;
 
-        result = await userManager.CreateAsync(user, "Foo.bar1");
+        result = await userManager.CreateAsync(user, "Pass123.");
         if (!result.Succeeded) HandleBadResult(result, "create user");
             
         result = await userManager.AddToRoleAsync(user, "Admin");
@@ -146,7 +147,7 @@ public class AppDataInit
         userRegular.LastName = "Wells";
         userRegular.UserName = userRegular.Email;
 
-        result = await userManager.CreateAsync(userRegular, "Foo.bar1");
+        result = await userManager.CreateAsync(userRegular, "Pass123.");
         if (!result.Succeeded) HandleBadResult(result, "create user");
             
         result = await userManager.AddToRoleAsync(userRegular, "User");
@@ -212,6 +213,13 @@ public class AppDataInit
         recipe.RecipeTimeNeeded = 30;
         recipe.AppUserId = userId;
 
+
+        var recipeProduct = NewWithMeta<RecipeProduct>();
+        recipeProduct.Product = product1;
+        recipeProduct.RequiredAmount = 3;
+        recipeProduct.Units = "pic";
+        recipe.RecipeProducts = new List<RecipeProduct> { recipeProduct };
+        
         context.Recipes.Add(recipe);
 
         //Recipe 2

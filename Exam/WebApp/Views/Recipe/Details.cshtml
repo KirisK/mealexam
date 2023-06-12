@@ -1,78 +1,68 @@
-@model Domain.App.Recipe
+@using Public.DTO.v1
+@using UserProduct = Domain.App.UserProduct
+@model WebApp.ViewModels.Recipe.DetailsViewModel
+
+@functions
+{
+    private string GetAvailableAmountStr(RecipeProduct product)
+    {
+       return Model.UserProducts
+            .Where(up => up.ProductId == product.ProductId)
+            .Select(up => $"Available: {up.AvailableAmount} {up.Units}")
+           .FirstOrDefault()??"Not in stock";
+    }
+}
 
 @{
     ViewData["Title"] = "Details";
+    
 }
 
-<h1>Details</h1>
+<h1>@Model.Recipe.RecipeName</h1>
 
 <div>
-    <h4>Recipe</h4>
-    <hr />
+    <h4>@(Model.Recipe.IsPublic ? "Public" : "Personal") recipe</h4>
+    <hr/>
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RecipeName)
+        <dt class="col-sm-2">
+            Time needed (min)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RecipeName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Recipe.RecipeTimeNeeded)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RecipeTimeNeeded)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Recipe.Servings)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RecipeTimeNeeded)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Recipe.Servings)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Recipe.Description)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
+        <dd class="col-sm-12">
+            @Html.Raw(Model.Recipe.Description.Replace(Environment.NewLine, "<br />"))
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsPublic)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsPublic)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Servings)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Servings)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AppUser)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AppUser!.FirstName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
+        <dt class="col-sm-2">Products needed</dt>
+        <dd class="col-sm-12">
+            <ul  class="list-group">
+                @foreach (var product in Model.Recipe.RecipeProducts ?? Array.Empty<RecipeProduct>())
+                {
+                    <li class="list-group-item d-flex">
+                        <span><span class="font-weight-bold">@product.Product!.ProductName</span> — @product.RequiredAmount @product.Units</span>
+                        <span class="flex-grow-1"></span>
+                        <span class="badge badge-info">@GetAvailableAmountStr(product)</span>
+                    </li>
+                }
+            </ul>
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+<div class="row mb-1">
+    <a asp-action="AddProduct" asp-route-id="@Model.Recipe.Id">Add Product</a>
+</div>
+<div class="row mb-1">
+    <a asp-action="Edit" asp-route-id="@Model.Recipe.Id">Edit</a>
+</div>
+<div class="row mb-1">
     <a asp-action="Index">Back to List</a>
 </div>

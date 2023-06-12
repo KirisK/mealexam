@@ -5,7 +5,7 @@ namespace Domain.App;
 
 public class Product: DomainEntityMetaId
 {
-    [MaxLength(64)] 
+    [MaxLength(256)] 
     public string ProductName { get; set; } = default!;
     
     

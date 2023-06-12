@@ -2,50 +2,58 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using App.BLL.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DAL.EF.App;
-using Domain.App;
+using Microsoft.AspNetCore.Authorization;
+using Public.DTO.v1;
+using WebApp.Extensions;
+using WebApp.HttpClient;
+using WebApp.ViewModels.Product;
 
 namespace WebApp.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly JwtHelper _jwtHelper;
+        private readonly IProductClient _productClient;
 
-        public ProductController(ApplicationDbContext context)
+        public ProductController(JwtHelper jwtHelper, IProductClient productClient)
         {
-            _context = context;
+            _jwtHelper = jwtHelper;
+            _productClient = productClient;
         }
 
         // GET: Product
         public async Task<IActionResult> Index()
         {
-              return _context.Products != null ? 
-                          View(await _context.Products.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Products'  is null.");
-        }
-
-        // GET: Product/Details/5
-        public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null || _context.Products == null)
+            var model = new IndexViewModel();
+            if (User.IsInRole("Admin"))
             {
-                return NotFound();
+                var resp = await _productClient.GetAllProducts(_jwtHelper.GetJwt(User));
+                if (resp.IsSuccessful)
+                {
+                    model.Products = resp.Value!;
+                    return View(model);
+                }
+
+                return Problem();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            var userProductsResp = await _productClient.GetUserProducts(_jwtHelper.GetJwt(User));
+            if (userProductsResp.IsSuccessful)
             {
-                return NotFound();
+                model.UserProducts = userProductsResp.Value!;
+                return View(model);
             }
 
-            return View(product);
+            return NotFound();
         }
 
         // GET: Product/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -55,110 +63,100 @@ namespace WebApp.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductName,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] Product product)
+        public async Task<IActionResult> Create(Product product)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                product.Id = Guid.NewGuid();
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                return View(product);
+            }
+
+            var resp = await _productClient.AddProduct(_jwtHelper.GetJwt(User), product);
+            if (resp.IsSuccessful)
+            {
                 return RedirectToAction(nameof(Index));
             }
+
             return View(product);
         }
 
         // GET: Product/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _context.Products == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var product = await _productClient.GetProduct(_jwtHelper.GetJwt(User), id.Value);
+            if (product.IsSuccessful)
             {
-                return NotFound();
+                return View(product.Value!);
             }
-            return View(product);
+
+            return NotFound();
         }
 
         // POST: Product/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("ProductName,CreatedBy,CreatedAt,UpdatedBy,UpdatedAt,Id")] Product product)
+        public async Task<IActionResult> Edit(Guid id, Product product)
         {
             if (id != product.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                return View(product);
+            }
+
+            var resp = await _productClient.UpdateProduct(_jwtHelper.GetJwt(User), product);
+            if (resp.IsSuccessful)
+            {
                 return RedirectToAction(nameof(Index));
             }
+
             return View(product);
         }
 
         // GET: Product/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _context.Products == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            var resp = await _productClient.GetProduct(_jwtHelper.GetJwt(User), id.Value);
+            if (resp.IsSuccessful)
             {
-                return NotFound();
+                return View(resp.Value!);
             }
 
-            return View(product);
+            return NotFound();
         }
 
         // POST: Product/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_context.Products == null)
+            var resp = await _productClient.DeleteProduct(_jwtHelper.GetJwt(User), id);
+            if (resp.IsSuccessful)
             {
-                return Problem("Entity set 'ApplicationDbContext.Products'  is null.");
+                return RedirectToAction(nameof(Index));
             }
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool ProductExists(Guid id)
-        {
-          return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+            return Problem(String.Join("\n", resp.ErrorMessage?.Messages ?? new[] {$"could not delete product {id}"}));
         }
     }
 }
