@@ -12,16 +12,16 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="UserProduct.ProductId" class="control-label"></label>
+                <label asp-for="UserProduct.ProductId" class="control-label">Product</label>
                 <select asp-for="UserProduct.ProductId" class="form-control" asp-items="Model.Products"></select>
             </div>
             <div class="form-group">
-                <label asp-for="UserProduct.AvailableAmount" class="control-label"></label>
+                <label asp-for="UserProduct.AvailableAmount" class="control-label">Amount of products</label>
                 <input asp-for="UserProduct.AvailableAmount" class="form-control"/>
                 <span asp-validation-for="UserProduct.AvailableAmount" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UserProduct.Units" class="control-label"></label>
+                <label asp-for="UserProduct.Units" class="control-label">Unit</label>
                 <input asp-for="UserProduct.Units" class="form-control"/>
                 <span asp-validation-for="UserProduct.Units" class="text-danger"></span>
             </div>
